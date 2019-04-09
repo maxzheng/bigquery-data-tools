@@ -42,5 +42,5 @@ setuptools.setup(
       'Programming Language :: Python :: 3.7',
     ],
 
-    keywords='<KEYWORDS>',
+    keywords='data transformation',
 )

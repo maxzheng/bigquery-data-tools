@@ -4,10 +4,10 @@ Tools for data transformation
 
 ## Defaults and Options
 
-By default, input data should be in the "data" directory. Transformed data will be written to "transformed-data"
+By default, input data will be read from "data" directory. Transformed data will be written to "transformed-data"
 directory. And 5 parallel processes are used to process the data concurrently.
 
-They can be changed via CLI options. See usage info by passing `--help` to the command.
+They can be changed via CLI options. See usage info by passing `--help` to a command.
 
 ## Usage Metrics
 

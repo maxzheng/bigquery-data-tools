@@ -28,6 +28,7 @@ def test_usage_metrics(cli_runner):
 
         assert ('Transforming data files from "data" and writing them to "transformed-data" '
                 'using 5 parallel processes\n') in result.output
+        assert 'Transformed 1 data file(s)' in result.output
 
         expected_record = {'value': 'a', '_timestamp': 'b', 'id': 'c', 'source': 'd', '_version': 'e',
                            'metric': {
@@ -63,7 +64,7 @@ def test_usage_metrics(cli_runner):
         transformer._transform_file('data/test.json.gz')
 
         count = 0
-        for serialized_record in gzip.open('transformed-data/test.json.gz'):
+        for serialized_record in gzip.open('updated-data/test.json.gz'):
             record = json.loads(serialized_record)
             assert expected_record == record
             count += 1

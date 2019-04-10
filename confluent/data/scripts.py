@@ -3,7 +3,7 @@ import click
 from confluent.data.transformers import Transformer, transform_usage_metrics
 
 
-@click.group()
+@click.group(help='Transforms various types of data to make them more usable')
 def transform():
     pass
 

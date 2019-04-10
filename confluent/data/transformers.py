@@ -46,6 +46,8 @@ class Transformer:
                 process_pool.close()
                 process_pool.join()
 
+                print('Transformed', len(data_files), 'data file(s)')
+
             except KeyboardInterrupt:
                 process_pool.terminate()
                 process_pool.join()

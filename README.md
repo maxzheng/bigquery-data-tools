@@ -20,6 +20,8 @@ not useful keys.  To do the transform, simply run:
 
 ## Development
 
+To contribute to the project, follow these steps to setup your development virtualenv to test your changes.
+
 We are using [tox](https://tox.readthedocs.io/en/latest/) to manage our virtualenvs and
 [pytest](https://docs.pytest.org/en/latest/) to run our tests. So let's set that up first:
 
@@ -40,3 +42,5 @@ To run the scripts, activate the venv:
 And then you can run the console scripts from [setup.py](setup.py) file, e.g.:
 
     $ transform --help
+
+Now, you can make any changes in the source code, and it will be reflected in the scripts.

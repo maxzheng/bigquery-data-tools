@@ -27,7 +27,7 @@ We are using [tox](https://tox.readthedocs.io/en/latest/) to manage our virtuale
     $ brew install python3
 
     # Install tox
-    $ pip install tox
+    $ sudo pip install tox
 
 Now we can setup our development venv and run tests by simply calling `tox`:
 

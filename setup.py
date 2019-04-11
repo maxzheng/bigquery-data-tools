@@ -2,7 +2,7 @@ import setuptools
 
 
 setuptools.setup(
-    name='data-tools',
+    name='confluent-data-tools',
     version='0.0.1',
 
     author='Max Zheng',

@@ -1,6 +1,6 @@
 # data-tools
 
-Tools for data transformation
+Tools for data transformation used by the Data Science team.
 
 ## Defaults and Options
 

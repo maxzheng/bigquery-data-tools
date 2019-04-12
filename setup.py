@@ -17,7 +17,7 @@ setuptools.setup(
 
     license='MIT',
 
-    packages=setuptools.find_packages(),
+    packages=['confluent'],
     include_package_data=True,
 
     python_requires='>=3.7',

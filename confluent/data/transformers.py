@@ -11,7 +11,7 @@ INVALID_KEY_CHARS_RE = re.compile('[^a-zA-Z0-9_]')
 class Transformer:
     """ Manager for transforming data files in parallel """
 
-    def __init__(self, transform, source_dir, sink_dir, path_contains=None, parallel_processes=5):
+    def __init__(self, transform, source_dir, sink_dir, path_contains=None, select_fields=None, parallel_processes=5):
         """
         Run transforms in parallel in multiple processes
 
@@ -19,19 +19,24 @@ class Transformer:
                                    output.
         :param str source_dir: Directory to read data files from
         :param str sink_dir: Directory to write data files to
-        :param str path_contains: Only process paths that contains the given value
+        :param str|None path_contains: Only process paths that contains the given value
+        :param set|None select_fields: A set of fields to extract from data files. Use a dot for nested fields.
+                                  Missing fields will be set to null.
         :param int parallel_processes: Number of processes to use
         """
         self._transform = transform
         self.source_dir = source_dir
         self.sink_dir = sink_dir
         self.path_contains = path_contains
+        self.select_fields = select_fields
         self.parallel_processes = parallel_processes
 
     def transform(self):
         """ Transform data files if not already done """
         print(f'Transforming data files from "{self.source_dir}" and writing them to "{self.sink_dir}" '
               f'using {self.parallel_processes} parallel processes')
+        if self.select_fields:
+            print('Only extracting these fields:', ', '.join(sorted(self.select_fields)))
 
         data_files = []
         for (dirpath, dirnames, filenames) in os.walk(self.source_dir):
@@ -39,6 +44,7 @@ class Transformer:
                 data_files.extend([os.path.join(dirpath, name) for name in filenames])
 
         if data_files:
+            print('-' * 80)
             try:
                 process_pool = multiprocessing.Pool(self.parallel_processes)
                 process_pool.map(self._transform_file, data_files)
@@ -70,7 +76,7 @@ class Transformer:
             temp_file = os.path.join(os.path.dirname(output_file), '.' + os.path.basename(output_file))
             os.makedirs(os.path.dirname(temp_file), exist_ok=True)
 
-            self._transform(input_file, temp_file)
+            self._transform(input_file, temp_file, select_fields=self.select_fields)
 
             os.rename(temp_file, output_file)
 
@@ -85,8 +91,8 @@ class Transformer:
                 pass
 
 
-def transform_usage_metrics(input_file, output_file):
-    def _clean_keys(data):
+def transform_usage_metrics(input_file, output_file, select_fields=None):
+    def _clean_keys(data, parent_key=None, select_fields=None):
         """
         Replace invalid characters (based on BigQuery) in keys with underscore and remove unnecessary keys ("another")
 
@@ -117,16 +123,20 @@ def transform_usage_metrics(input_file, output_file):
 
         for key, value in data.items():
             key = INVALID_KEY_CHARS_RE.sub('_', key)
-            if type(value) == dict:
-                value = _clean_keys(value)
+            full_key = f'{parent_key}.{key}' if parent_key else key
 
-            if key != 'another':  # HACK: Not useful / only appears in certain records, so it is just easier to exclude.
-                clean_data[key] = value
+            if select_fields and full_key not in select_fields:
+                continue
+
+            if type(value) == dict:
+                value = _clean_keys(value, parent_key=full_key, select_fields=select_fields)
+
+            clean_data[key] = value
 
         return clean_data
 
     with gzip.open(output_file, 'wt') as fp:
         for line in gzip.open(input_file, 'rt'):
             data = json.loads(line)
-            new_data = _clean_keys(data)
+            new_data = _clean_keys(data, select_fields=select_fields)
             fp.write(json.dumps(new_data) + '\n')

@@ -44,3 +44,7 @@ And then you can run the console scripts from [setup.py](setup.py) file, e.g.:
     $ transform --help
 
 Now, you can make any changes in the source code, and it will be reflected in the scripts.
+
+## License
+
+This is licensed under [MIT License](LICENSE), so you are free to do anything that you want with the code. :D

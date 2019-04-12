@@ -71,14 +71,15 @@ def test_usage_metrics_without_options(cli_runner, mock_data):
 
 def test_usage_metrics_select_fields(cli_runner, mock_data):
     result = cli_runner.invoke_and_assert_exit(0, transform, [
-        'usage-metrics', '--select-fields', 'id,metric,metric.user,metric.type,timestamp'])
+        'usage-metrics', '--select-fields', 'id,metric,metric.user,metric.type,timestamp,@version'])
 
     assert ('Transforming data files from "data" and writing them to "transformed-data" '
             'using 5 parallel processes\n') in result.output
     assert 'Transformed 1 data file(s)' in result.output
-    assert 'Only extracting these fields: id, metric, metric.type, metric.user, timestamp' in result.output
+    assert 'Only extracting these fields: @version, id, metric, metric.type, metric.user, timestamp' in result.output
 
     expected_record = {'id': 'c',
+                       '_version': 'e',
                        'metric': {
                           'user': 'g',
                           'type': 'j'},

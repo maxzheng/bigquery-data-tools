@@ -122,8 +122,8 @@ def transform_usage_metrics(input_file, output_file, select_fields=None):
         clean_data = {}
 
         for key, value in data.items():
-            key = INVALID_KEY_CHARS_RE.sub('_', key)
             full_key = f'{parent_key}.{key}' if parent_key else key
+            key = INVALID_KEY_CHARS_RE.sub('_', key)
 
             if select_fields and full_key not in select_fields:
                 continue

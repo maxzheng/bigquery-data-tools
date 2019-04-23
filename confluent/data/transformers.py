@@ -21,15 +21,22 @@ class Transformer:
         :param str sink_dir: Directory to write data files to
         :param str|None path_contains: Only process paths that contains the given value
         :param set|None select_fields: A set of fields to extract from data files. Use a dot for nested fields.
-                                  Missing fields will be set to null.
+                                       To exclude a field, prefix it with a negative sign ("-").
         :param int parallel_processes: Number of processes to use
         """
         self._transform = transform
         self.source_dir = source_dir
         self.sink_dir = sink_dir
         self.path_contains = path_contains
-        self.select_fields = select_fields
         self.parallel_processes = parallel_processes
+
+        # Split select vs exclude fields
+        self.select_fields = select_fields
+        self.exclude_fields = None
+        if self.select_fields:
+            fields_with_exclude_prefix = set(f for f in self.select_fields if f.startswith('-'))
+            self.exclude_fields = set(f.lstrip('-') for f in fields_with_exclude_prefix)
+            self.select_fields = self.select_fields - fields_with_exclude_prefix
 
     def transform(self):
         """ Transform data files if not already done """
@@ -37,6 +44,8 @@ class Transformer:
               f'using {self.parallel_processes} parallel processes')
         if self.select_fields:
             print('Only extracting these fields:', ', '.join(sorted(self.select_fields)))
+        if self.exclude_fields:
+            print('Excluding these fields:', ', '.join(sorted(self.exclude_fields)))
 
         data_files = []
         for (dirpath, dirnames, filenames) in os.walk(self.source_dir):
@@ -76,7 +85,7 @@ class Transformer:
             temp_file = os.path.join(os.path.dirname(output_file), '.' + os.path.basename(output_file))
             os.makedirs(os.path.dirname(temp_file), exist_ok=True)
 
-            self._transform(input_file, temp_file, select_fields=self.select_fields)
+            self._transform(input_file, temp_file, select_fields=self.select_fields, exclude_fields=self.exclude_fields)
 
             os.rename(temp_file, output_file)
 
@@ -91,8 +100,8 @@ class Transformer:
                 pass
 
 
-def transform_usage_metrics(input_file, output_file, select_fields=None):
-    def _clean_keys(data, parent_key=None, select_fields=None):
+def transform_usage_metrics(input_file, output_file, select_fields=None, exclude_fields=None):
+    def _clean_keys(data, parent_key=None, select_fields=None, exclude_fields=None):
         """
         Replace invalid characters (based on BigQuery) in keys with underscore and remove unnecessary keys ("another")
 
@@ -125,11 +134,13 @@ def transform_usage_metrics(input_file, output_file, select_fields=None):
             full_key = f'{parent_key}.{key}' if parent_key else key
             key = INVALID_KEY_CHARS_RE.sub('_', key)
 
-            if select_fields and full_key not in select_fields:
+            if (select_fields and full_key not in select_fields
+                    or exclude_fields and full_key in exclude_fields):
                 continue
 
             if type(value) == dict:
-                value = _clean_keys(value, parent_key=full_key, select_fields=select_fields)
+                value = _clean_keys(value, parent_key=full_key, select_fields=select_fields,
+                                    exclude_fields=exclude_fields)
 
             clean_data[key] = value
 
@@ -138,5 +149,5 @@ def transform_usage_metrics(input_file, output_file, select_fields=None):
     with gzip.open(output_file, 'wt') as fp:
         for line in gzip.open(input_file, 'rt'):
             data = json.loads(line)
-            new_data = _clean_keys(data, select_fields=select_fields)
+            new_data = _clean_keys(data, select_fields=select_fields, exclude_fields=exclude_fields)
             fp.write(json.dumps(new_data) + '\n')

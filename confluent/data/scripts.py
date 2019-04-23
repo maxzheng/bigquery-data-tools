@@ -13,7 +13,7 @@ def transform():
 @click.option('--sink-dir', default='transformed-data', help='Directory to write transformed data files to')
 @click.option('--path-contains', help='Only process paths that contains the provided value')
 @click.option('--select-fields', help='Comma separated list of fields to extract. Use a dot for nested fields. '
-                                      'Missing fields will be set to null.')
+                                      'To exclude a field, prefix it with a negative sign ("-").')
 def usage_metrics(source_dir, sink_dir, path_contains, select_fields):
     if select_fields:
         select_fields = set(select_fields.split(','))

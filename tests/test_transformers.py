@@ -94,6 +94,60 @@ def test_usage_metrics_select_fields(cli_runner, mock_data):
     assert count == 10
 
 
+def test_usage_metrics_exclude_fields_with_others(cli_runner, mock_data):
+    result = cli_runner.invoke_and_assert_exit(0, transform, [
+        'usage-metrics', '--select-fields', 'id,metric,-metric.user,metric.type,-timestamp,@version'])
+
+    assert ('Transforming data files from "data" and writing them to "transformed-data" '
+            'using 5 parallel processes\n') in result.output
+    assert 'Transformed 1 data file(s)' in result.output
+    assert 'Only extracting these fields: @version, id, metric, metric.type' in result.output
+    assert 'Excluding these fields: metric.user, timestamp' in result.output
+
+    expected_record = {'id': 'c',
+                       '_version': 'e',
+                       'metric': {
+                          'type': 'j'}}
+
+    count = 0
+    for serialized_record in gzip.open('transformed-data/test.json.gz'):
+        record = json.loads(serialized_record)
+        assert expected_record == record
+        count += 1
+
+    assert count == 10
+
+
+def test_usage_metrics_exclude_fields_only(cli_runner, mock_data):
+    result = cli_runner.invoke_and_assert_exit(0, transform, [
+        'usage-metrics', '--select-fields', '-metric.user'])
+
+    assert ('Transforming data files from "data" and writing them to "transformed-data" '
+            'using 5 parallel processes\n') in result.output
+    assert 'Transformed 1 data file(s)' in result.output
+    assert 'Only extracting these fields' not in result.output
+    assert 'Excluding these fields: metric.user' in result.output
+
+    expected_record = {'value': 'a', '_timestamp': 'b', 'id': 'c', 'source': 'd', '_version': 'e',
+                       'metric': {
+                          'request': 'f',
+                          'physicalstatefulcluster_core_confluent_cloud_version': 'h',
+                          'statefulset_kubernetes_io_pod_name': 'i',
+                          'type': 'j', '_deltaSeconds': 'k', 'job': 'l', 'pod_name': 'm',
+                          'physicalstatefulcluster_core_confluent_cloud_name': 'n', 'source': 'o',
+                          'tenant': 'p', 'clusterId': 'q', '_metricname': 'r', 'another': 's', 'instance': 't',
+                          'pscVersion': 'u'},
+                       'timestamp': 1234567}
+
+    count = 0
+    for serialized_record in gzip.open('transformed-data/test.json.gz'):
+        record = json.loads(serialized_record)
+        assert expected_record == record
+        count += 1
+
+    assert count == 10
+
+
 def test_usage_metrics_path_contains(cli_runner, mock_data):
     # No match
     result = cli_runner.invoke_and_assert_exit(0, transform, ['usage-metrics', '--path-contains', 'blah'])

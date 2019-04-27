@@ -1,6 +1,9 @@
+import warnings
+
 import click
 
 from confluent.data.transformers import Transformer, transform_usage_metrics
+from confluent.data.managers import BigQueryManager
 
 
 @click.group(help='Transforms various types of data to make them more usable')
@@ -20,3 +23,17 @@ def usage_metrics(source_dir, sink_dir, path_contains, select_fields):
     transformer = Transformer(transform_usage_metrics, source_dir, sink_dir, path_contains=path_contains,
                               select_fields=select_fields)
     transformer.transform()
+
+
+@click.group(help='Manage BigQuery projects, datasets, etc')
+def bq_admin():
+    pass
+
+
+@bq_admin.command(help='Move a dataset from one project to another')
+@click.argument('from_dataset')
+@click.argument('to_project_or_dataset')
+def move_dataset(from_dataset, to_project_or_dataset):
+    warnings.filterwarnings('ignore', '.*authenticated using end user credential.*',)
+    man = BigQueryManager()
+    man.move_dataset(from_dataset, to_project_or_dataset)

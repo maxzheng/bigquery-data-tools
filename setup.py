@@ -26,6 +26,7 @@ setuptools.setup(
     entry_points={
        'console_scripts': [
            'transform = confluent.data.scripts:transform',
+           'bq-admin = confluent.data.scripts:bq_admin',
        ],
     },
 

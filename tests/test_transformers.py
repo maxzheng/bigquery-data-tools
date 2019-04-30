@@ -43,7 +43,7 @@ def test_usage_metrics_without_options(cli_runner, mock_data):
                           'statefulset_kubernetes_io_pod_name': 'i',
                           'type': 'j', '_deltaSeconds': 'k', 'job': 'l', 'pod_name': 'm',
                           'physicalstatefulcluster_core_confluent_cloud_name': 'n', 'source': 'o',
-                          'tenant': 'p', 'clusterId': 'q', '_metricname': 'r', 'another': 's', 'instance': 't',
+                          'tenant': 'p', 'clusterId': 'q', '_metricname': 'r', 'instance': 't',
                           'pscVersion': 'u'},
                        'timestamp': 1234567}
 
@@ -59,6 +59,7 @@ def test_usage_metrics_without_options(cli_runner, mock_data):
     # the above code runs them in a child process.
     transformer = Transformer(transform_usage_metrics, 'data', 'updated-data')
     transformer._transform_file('data/test.json.gz')
+    expected_record['metric']['another'] = 's'
 
     count = 0
     for serialized_record in gzip.open('updated-data/test.json.gz'):

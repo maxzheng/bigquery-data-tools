@@ -1,6 +1,41 @@
 # data-tools
 
-Tools for data transformation used by the Data Science team.
+Tools for data management and transformation used by the Data Science team.
+
+# Installation
+
+Install using pip -- ideally in a virtual env:
+
+    $ pip install git+https://github.com/confluentinc/data-tools
+
+# Data Management
+
+## BigQuery
+
+### Move/Rename/Copy Dataset
+
+Normal tables and views are supported, but not tables that depends on external data source.
+
+To move a dataset:
+
+    $ bq-admin move-dataset project-name-123:dataset-name new-project-123
+
+To rename a dataset, just use the same project name with different target dataset name:
+
+    $ bq-admin move-dataset project-name-123:dataset-name project-name-123:new-dataset-name
+
+To copy a dataset:
+
+    $ bq-admin copy-dataset project-name-123:dataset-name new-project-123
+
+### Create Table Views
+
+First, create a JSON view spec based on example in [confluent/data/specs.py](confluent/data/specs.py). Let's say it's
+saved to /tmp/view-specs.json, to create the table views, run:
+
+    $ bq-admin create-views /tmp/view-specs.json
+
+# Data Transformation
 
 ## Defaults and Options
 
@@ -18,7 +53,7 @@ not useful keys.  To do the transform, simply run:
     Transforming data files from "data" and writing them to "transformed-data" using 5 parallel processes
     ...
 
-## Development
+# Development
 
 To contribute to the project, follow these steps to setup your development virtualenv to test your changes.
 
@@ -45,6 +80,6 @@ And then you can run the console scripts from [setup.py](setup.py) file, e.g.:
 
 Now, you can make any changes in the source code, and it will be reflected in the scripts.
 
-## License
+# License
 
 This is licensed under [MIT License](LICENSE), so you are free to do anything that you want with the code. :smile:

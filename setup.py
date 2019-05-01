@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='confluent-data-tools',
-    version='0.0.1',
+    version='0.1.0',
 
     author='Max Zheng',
     author_email='mzheng@confluent.io',
@@ -26,6 +26,7 @@ setuptools.setup(
     entry_points={
        'console_scripts': [
            'transform = confluent.data.scripts:transform',
+           'bq-admin = confluent.data.scripts:bq_admin',
        ],
     },
 

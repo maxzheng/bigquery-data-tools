@@ -1,0 +1,14 @@
+{
+    "latest-record": {
+        "project-12345": {
+            "marketo": {
+                "ids": ["id", "marketoguid"],
+                "datetime": "loaded_at"
+            },
+            "salesforce": {
+                "ids": ["id"],
+                "datetime": "_sdc_batched_at"
+            }
+        }
+    }
+}

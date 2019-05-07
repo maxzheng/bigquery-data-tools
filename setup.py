@@ -15,7 +15,7 @@ setuptools.setup(
 
     install_requires=open('requirements.txt').read(),
 
-    license='MIT',
+    license='Apache License 2.0',
 
     packages=['confluent'],
     include_package_data=True,
@@ -37,10 +37,10 @@ setuptools.setup(
       'Intended Audience :: Science/Research',
       'Topic :: Text Processing',
 
-      'License :: OSI Approved :: MIT License',
+      'License :: OSI Approved :: Apache Software License',
 
       'Programming Language :: Python :: 3',
-      'Programming Language :: Python :: 3.7',
+      'Programming Language :: Python :: 3.6',
     ],
 
     keywords='data transformation',

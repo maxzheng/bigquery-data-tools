@@ -82,4 +82,4 @@ Now, you can make any changes in the source code, and it will be reflected in th
 
 # License
 
-This is licensed under [MIT License](LICENSE), so you are free to do anything that you want with the code. :smile:
+This is licensed under [Apache License 2.0](LICENSE).

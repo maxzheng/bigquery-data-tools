@@ -20,7 +20,7 @@ setuptools.setup(
     packages=['confluent'],
     include_package_data=True,
 
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     setup_requires=['setuptools-git', 'wheel'],
 
     entry_points={

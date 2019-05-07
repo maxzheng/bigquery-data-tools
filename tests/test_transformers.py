@@ -36,7 +36,7 @@ def test_usage_metrics_without_options(cli_runner, mock_data):
             'using 5 parallel processes\n') in result.output
     assert 'Transformed 1 data file(s)' in result.output
 
-    expected_record = {'value': 'a', '_timestamp': 'b', 'id': 'c', 'source': 'd', '_version': 'e',
+    expected_record = {'value': 'a', 'datetime_pt': '1970-01-14 22:56:07', 'id': 'c', 'source': 'd', '_version': 'e',
                        'metric': {
                           'request': 'f', 'user': 'g',
                           'physicalstatefulcluster_core_confluent_cloud_version': 'h',
@@ -129,7 +129,7 @@ def test_usage_metrics_exclude_fields_only(cli_runner, mock_data):
     assert 'Only extracting these fields' not in result.output
     assert 'Excluding these fields: metric.user' in result.output
 
-    expected_record = {'value': 'a', '_timestamp': 'b', 'id': 'c', 'source': 'd', '_version': 'e',
+    expected_record = {'value': 'a', 'datetime_pt': '1970-01-14 22:56:07', 'id': 'c', 'source': 'd', '_version': 'e',
                        'metric': {
                           'request': 'f',
                           'physicalstatefulcluster_core_confluent_cloud_version': 'h',

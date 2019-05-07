@@ -1,8 +1,11 @@
+from datetime import datetime
 import gzip
 import json
 import multiprocessing
 import os
 import re
+
+import pytz
 
 
 INVALID_KEY_CHARS_RE = re.compile('[^a-zA-Z0-9_]')
@@ -101,11 +104,50 @@ class Transformer:
 
 
 def transform_usage_metrics(input_file, output_file, select_fields=None, exclude_fields=None):
-    def _clean_keys(data, parent_key=None, select_fields=None, exclude_fields=None):
-        """
-        Replace invalid characters (based on BigQuery) in keys with underscore and remove unnecessary keys ("another")
+    with gzip.open(output_file, 'wt') as fp:
+        for line in gzip.open(input_file, 'rt'):
+            record = json.loads(line)
+            clean_record = transform_usage_metrics_record(record, select_fields=select_fields,
+                                                          exclude_fields=exclude_fields)
+            fp.write(json.dumps(clean_record) + '\n')
 
-        Example input record:
+
+def _clean_bigquery_keys(record, select_fields=None, exclude_fields=None, _parent_key=None):
+    """
+    Replace invalid characters (based on BigQuery) in keys with underscore and optionally select or exclude fields.
+
+    :param dict record: Dirty record to clean
+    :param set select_fields: Set of fields to include
+    :param set exclude_fields: Set of fields to exclude
+    :param str _parent_key: Parent key for the record. This is used internally to construct full key for nested records.
+    """
+
+    clean_data = {}
+
+    for key, value in record.items():
+        full_key = f'{_parent_key}.{key}' if _parent_key else key
+        key = INVALID_KEY_CHARS_RE.sub('_', key)
+
+        if (select_fields and full_key not in select_fields
+                or exclude_fields and full_key in exclude_fields):
+            continue
+
+        if type(value) == dict:
+            value = _clean_bigquery_keys(value, select_fields=select_fields, exclude_fields=exclude_fields,
+                                         _parent_key=full_key)
+
+        clean_data[key] = value
+
+    return clean_data
+
+
+def transform_usage_metrics_record(record, select_fields=None, exclude_fields=None):
+    """
+    Transform usage metrics by removing @timestamp, add datetime_pt for Pacific Time formatted datetime, and
+    clean the keys using :func:`_clean_bigquery_keys`
+
+    For example:
+        Input record:
             {"value":"",
              "@timestamp":"",
              "id":"",
@@ -126,28 +168,34 @@ def transform_usage_metrics(input_file, output_file, select_fields=None, exclude
                  "instance":"",
                  "pscVersion":""},
              "timestamp":1234567}
-        """
 
-        clean_data = {}
+        Output record:
+            {"value":"",
+             "datetime_pt": "1970-01-14 22:56:07",
+             "id":"",
+             "source":",
+             "_version":"",
+             "metric":{
+                "request":"","user":"",
+                 "physicalstatefulcluster_core_confluent_cloud_version":"",
+                 "statefulset_kubernetes_io_pod_name":"","type":"",
+                 "_deltaSeconds":"",
+                 "job":"",
+                 "pod_name":"",
+                 "physicalstatefulcluster_core_confluent_cloud_name":"",
+                 "source":"",
+                 "tenant":"",
+                 "clusterId":"",
+                 "_metricname":"",
+                 "instance":"",
+                 "pscVersion":""},
+             "timestamp":1234567}
+    """
+    # remove @timestamp as it is not as accurate as timestamp field and therefore not useful
+    record.pop('@timestamp', None)
 
-        for key, value in data.items():
-            full_key = f'{parent_key}.{key}' if parent_key else key
-            key = INVALID_KEY_CHARS_RE.sub('_', key)
+    # Add a localized Pacific date time for partitioning/filtering
+    pacific_time = datetime.fromtimestamp(record['timestamp'], pytz.timezone('US/Pacific'))
+    record['datetime_pt'] = pacific_time.strftime('%Y-%m-%d %H:%M:%S')
 
-            if (select_fields and full_key not in select_fields
-                    or exclude_fields and full_key in exclude_fields):
-                continue
-
-            if type(value) == dict:
-                value = _clean_keys(value, parent_key=full_key, select_fields=select_fields,
-                                    exclude_fields=exclude_fields)
-
-            clean_data[key] = value
-
-        return clean_data
-
-    with gzip.open(output_file, 'wt') as fp:
-        for line in gzip.open(input_file, 'rt'):
-            data = json.loads(line)
-            new_data = _clean_keys(data, select_fields=select_fields, exclude_fields=exclude_fields)
-            fp.write(json.dumps(new_data) + '\n')
+    return _clean_bigquery_keys(record, select_fields=select_fields, exclude_fields=exclude_fields)

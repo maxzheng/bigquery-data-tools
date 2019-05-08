@@ -171,6 +171,7 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
 
         Output record:
             {"value":"",
+             "date_pt": "1970-01-14",
              "datetime_pt": "1970-01-14 22:56:07",
              "id":"",
              "source":",
@@ -194,8 +195,9 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
     # remove @timestamp as it is not as accurate as timestamp field and therefore not useful
     record.pop('@timestamp', None)
 
-    # Add a localized Pacific date time for partitioning/filtering
+    # Add a localized Pacific date[time] for partitioning/filtering
     pacific_time = datetime.fromtimestamp(record['timestamp'], pytz.timezone('US/Pacific'))
     record['datetime_pt'] = pacific_time.strftime('%Y-%m-%d %H:%M:%S')
+    record['date_pt'] = pacific_time.strftime('%Y-%m-%d')
 
     return _clean_bigquery_keys(record, select_fields=select_fields, exclude_fields=exclude_fields)

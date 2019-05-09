@@ -157,7 +157,7 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
                 "request":"","user":"",
                  "physicalstatefulcluster.core.confluent.cloud/version":"",
                  "statefulset.kubernetes.io/pod-name":"","type":"",
-                 "_deltaSeconds":50,
+                 "_deltaSeconds":"50",
                  "job":"",
                  "pod-name":"",
                  "physicalstatefulcluster.core.confluent.cloud/name":"",
@@ -180,7 +180,7 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
                 "request":"","user":"",
                  "physicalstatefulcluster_core_confluent_cloud_version":"",
                  "statefulset_kubernetes_io_pod_name":"","type":"",
-                 "_deltaSeconds":60,                                <-- rounded to nearest 60 secs interval
+                 "_deltaSeconds":60,                                <-- rounded to nearest 60 secs interval as int
                  "job":"",
                  "pod_name":"",
                  "physicalstatefulcluster_core_confluent_cloud_name":"",
@@ -198,7 +198,7 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
     # Round deltaSeconds and timestamp to nearest minute (60 seconds) to simplify analytics later
     delta_unit = 60
     record['timestamp'] = int(record['timestamp'] / delta_unit + 0.5) * delta_unit
-    record['metric']['_deltaSeconds'] = max(int(record['metric']['_deltaSeconds'] / delta_unit + 0.5) * delta_unit,
+    record['metric']['_deltaSeconds'] = max(int(int(record['metric']['_deltaSeconds']) / delta_unit + 0.5) * delta_unit,
                                             delta_unit)
 
     # Add a localized Pacific date[time] for partitioning/filtering

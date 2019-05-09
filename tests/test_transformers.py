@@ -20,7 +20,7 @@ def mock_data():
                                         "request": "f", "user": "g",
                                         "physicalstatefulcluster.core.confluent.cloud/version": "h",
                                         "statefulset.kubernetes.io/pod-name": "i", "type": "j",
-                                        "_deltaSeconds": 50, "job": "l", "pod-name": "m",
+                                        "_deltaSeconds": "50", "job": "l", "pod-name": "m",
                                         "physicalstatefulcluster.core.confluent.cloud/name": "n",
                                         "source": "o", "tenant": "p", "clusterId": "q", "_metricname": "r",
                                         "another": "s", "instance": "t", "pscVersion": "u"},

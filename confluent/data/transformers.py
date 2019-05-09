@@ -157,7 +157,7 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
                 "request":"","user":"",
                  "physicalstatefulcluster.core.confluent.cloud/version":"",
                  "statefulset.kubernetes.io/pod-name":"","type":"",
-                 "_deltaSeconds":"",
+                 "_deltaSeconds":50,
                  "job":"",
                  "pod-name":"",
                  "physicalstatefulcluster.core.confluent.cloud/name":"",
@@ -171,16 +171,16 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
 
         Output record:
             {"value":"",
-             "date_pt": "1970-01-14",
-             "datetime_pt": "1970-01-14 22:56:07",
+             "date_pt": "1970-01-14",                               <-- new field / removed @timestamp
+             "datetime_pt": "1970-01-14 22:56:00",                  <-- new field / rounded to minute
              "id":"",
              "source":",
-             "_version":"",
+             "_version":"",                                         <-- replaced invalid @ with _ / same in other fields
              "metric":{
                 "request":"","user":"",
                  "physicalstatefulcluster_core_confluent_cloud_version":"",
                  "statefulset_kubernetes_io_pod_name":"","type":"",
-                 "_deltaSeconds":"",
+                 "_deltaSeconds":60,                                <-- rounded to nearest 60 secs interval
                  "job":"",
                  "pod_name":"",
                  "physicalstatefulcluster_core_confluent_cloud_name":"",
@@ -190,10 +190,16 @@ def transform_usage_metrics_record(record, select_fields=None, exclude_fields=No
                  "_metricname":"",
                  "instance":"",
                  "pscVersion":""},
-             "timestamp":1234567}
+             "timestamp":1234560}                                   <-- rounded to nearest minute
     """
     # remove @timestamp as it is not as accurate as timestamp field and therefore not useful
     record.pop('@timestamp', None)
+
+    # Round deltaSeconds and timestamp to nearest minute (60 seconds) to simplify analytics later
+    delta_unit = 60
+    record['timestamp'] = int(record['timestamp'] / delta_unit + 0.5) * delta_unit
+    record['metric']['_deltaSeconds'] = max(int(record['metric']['_deltaSeconds'] / delta_unit + 0.5) * delta_unit,
+                                            delta_unit)
 
     # Add a localized Pacific date[time] for partitioning/filtering
     pacific_time = datetime.fromtimestamp(record['timestamp'], pytz.timezone('US/Pacific'))

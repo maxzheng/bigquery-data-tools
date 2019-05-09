@@ -20,7 +20,7 @@ def mock_data():
                                         "request": "f", "user": "g",
                                         "physicalstatefulcluster.core.confluent.cloud/version": "h",
                                         "statefulset.kubernetes.io/pod-name": "i", "type": "j",
-                                        "_deltaSeconds": "k", "job": "l", "pod-name": "m",
+                                        "_deltaSeconds": 50, "job": "l", "pod-name": "m",
                                         "physicalstatefulcluster.core.confluent.cloud/name": "n",
                                         "source": "o", "tenant": "p", "clusterId": "q", "_metricname": "r",
                                         "another": "s", "instance": "t", "pscVersion": "u"},
@@ -36,17 +36,17 @@ def test_usage_metrics_without_options(cli_runner, mock_data):
             'using 5 parallel processes\n') in result.output
     assert 'Transformed 1 data file(s)' in result.output
 
-    expected_record = {'value': 'a', 'date_pt': '1970-01-14', 'datetime_pt': '1970-01-14 22:56:07',
+    expected_record = {'value': 'a', 'date_pt': '1970-01-14', 'datetime_pt': '1970-01-14 22:56:00',
                        'id': 'c', 'source': 'd', '_version': 'e',
                        'metric': {
                           'request': 'f', 'user': 'g',
                           'physicalstatefulcluster_core_confluent_cloud_version': 'h',
                           'statefulset_kubernetes_io_pod_name': 'i',
-                          'type': 'j', '_deltaSeconds': 'k', 'job': 'l', 'pod_name': 'm',
+                          'type': 'j', '_deltaSeconds': 60, 'job': 'l', 'pod_name': 'm',
                           'physicalstatefulcluster_core_confluent_cloud_name': 'n', 'source': 'o',
                           'tenant': 'p', 'clusterId': 'q', '_metricname': 'r', 'instance': 't',
                           'pscVersion': 'u'},
-                       'timestamp': 1234567}
+                       'timestamp': 1234560}
 
     count = 0
     for serialized_record in gzip.open('transformed-data/test.json.gz'):
@@ -85,7 +85,7 @@ def test_usage_metrics_select_fields(cli_runner, mock_data):
                        'metric': {
                           'user': 'g',
                           'type': 'j'},
-                       'timestamp': 1234567}
+                       'timestamp': 1234560}
 
     count = 0
     for serialized_record in gzip.open('transformed-data/test.json.gz'):
@@ -130,17 +130,17 @@ def test_usage_metrics_exclude_fields_only(cli_runner, mock_data):
     assert 'Only extracting these fields' not in result.output
     assert 'Excluding these fields: metric.user' in result.output
 
-    expected_record = {'value': 'a', 'date_pt': '1970-01-14', 'datetime_pt': '1970-01-14 22:56:07',
+    expected_record = {'value': 'a', 'date_pt': '1970-01-14', 'datetime_pt': '1970-01-14 22:56:00',
                        'id': 'c', 'source': 'd', '_version': 'e',
                        'metric': {
                           'request': 'f',
                           'physicalstatefulcluster_core_confluent_cloud_version': 'h',
                           'statefulset_kubernetes_io_pod_name': 'i',
-                          'type': 'j', '_deltaSeconds': 'k', 'job': 'l', 'pod_name': 'm',
+                          'type': 'j', '_deltaSeconds': 60, 'job': 'l', 'pod_name': 'm',
                           'physicalstatefulcluster_core_confluent_cloud_name': 'n', 'source': 'o',
                           'tenant': 'p', 'clusterId': 'q', '_metricname': 'r', 'another': 's', 'instance': 't',
                           'pscVersion': 'u'},
-                       'timestamp': 1234567}
+                       'timestamp': 1234560}
 
     count = 0
     for serialized_record in gzip.open('transformed-data/test.json.gz'):

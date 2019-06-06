@@ -46,6 +46,8 @@ They can be changed via CLI options. See usage info by passing `--help` to a com
 
 ## Usage Metrics
 
+:exclamation: This is deprecated and no longer used, but kept as an example of how transformers work.
+
 This script will replace invalid keys (based on BigQuery column naming convention) with underscores and may remove some
 not useful keys.  To do the transform, simply run:
 
